@@ -35,13 +35,14 @@ phases:
       - echo "Build started on `date`"
       - echo "LISTING THE REPOSITORIES"   
       - aws ecr describe-repositories
+      - aws ecs list-container-instances --cluster Dev-Phishtray-Pipeline
       - echo Logging.. in to Amazon ECR ....
       - eval $(aws ecr get-login --region $aws_default_region --no-include-email)
-      - ecs-cli compose create [--verbose] [--project-name new-codebuild] [--task-role-arn arn:aws:iam::$aws_account_id:role/service-role/codebuild-new-codebuild-service-role] [--region $aws_default_region] [--cluster-config Dev-Phishtray-Pipeline] [-ecs-profile Dev-Phishtray-Pipeline] [--cluster Dev-Phishtray-Pipeline]
+#      - ecs-cli compose create [--verbose] [--project-name new-codebuild] [--task-role-arn arn:aws:iam::$aws_account_id:role/service-role/codebuild-new-codebuild-service-role] [--region $aws_default_region] [--cluster-config Dev-Phishtray-Pipeline] [-ecs-profile Dev-Phishtray-Pipeline] [--cluster Dev-Phishtray-Pipeline]
 
 
 #       listing images using the ecs-cli.       
-      - ecs-cli images --region $aws_default_region
+#      - ecs-cli images --region $aws_default_region
 
 #      - echo Building the DJANGO AND MYSQL DOCKER IMAGES !!!!
  #     - docker-compose build
