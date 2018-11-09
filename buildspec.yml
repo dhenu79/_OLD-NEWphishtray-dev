@@ -1,0 +1,55 @@
+version: 0.2
+
+phases:
+  install:
+    commands:
+      - echo INSTALLING ECS_CLI......
+      - sudo curl -o /usr/local/bin/ecs-cli https://s3.amazonaws.com/amazon-ecs-cli/ecs-cli-linux-amd64-latest
+      - sudo chmod +x /usr/local/bin/ecs-cli
+      - DATETIME=$(date +%d%m%y__%H%M)
+      - VERSION="$(git log --pretty=format:'%h' -n 1) $(date +%d:%m:%Y*****%H:%M)"
+      - echo $VERSION
+      - echo CONFIGURING ECS-CLI
+      - ecs-cli configure --cluster Dev-Phishtray-Pipeline --default-launch-type EC2 --region $aws_default_region --config-name Dev-Phishtray-Pipeline
+      - ecs-cli configure profile --profile-name Dev-Phishtray-Pipeline --access-key $aws_access_key_id --secret-key $aws_secret_access_key   
+      - echo  ******************************************************************************************************
+  
+  pre_build:
+    commands:
+      - echo Creating notification message file ..
+      - echo "CODEBUILD_INITIATOR:${CODEBUILD_INITIATOR}" | tee -a sns-message.txt
+      - echo "CODEBUILD_BUILD_ID:${CODEBUILD_BUILD_ID}" | tee -a sns-message.txt
+      - echo "CODEBUILD_SOURCE_REPO_URL:${CODEBUILD_SOURCE_REPO_URL}" | tee -a sns-message.txt
+      - echo "CODEBUILD_SOURCE_VERSION:${CODEBUILD_SOURCE_VERSION}" | tee -a sns-message.txt
+      - echo "CODEBUILD_RESOLVED_SOURCE_VERSION:${CODEBUILD_RESOLVED_SOURCE_VERSION}" | tee -a sns-message.txt
+      - echo "docker compose version :${DOCKER_COMPOSE_VERSION}" | tee -a sns-message.txt   
+      - echo "" && docker -v 
+      - echo "" && ecs-cli --version
+      - echo "node js version :" && node -v
+      - echo "npn version :" && npm -v
+      - echo  ******************************************************************************************************
+      
+  
+  build:
+    commands:
+      - echo "Build started on `date`"
+      - echo "LISTING THE REPOSITORIES"   
+      - aws ecr describe-repositories
+      - echo Logging.. in to Amazon ECR ...
+      - eval $(aws ecr get-login --region $aws_default_region --no-include-email)
+#      - ecs-cli compose --verbose --project-name new-codebuild --task-role-arn arn:aws:iam::$aws_account_id:role/service-role/codebuild-new-codebuild-service-role --region $aws_default_region --cluster-config Dev-Phishtray-Pipeline --ecs-profile Dev-Phishtray-Pipeline --cluster Dev-Phishtray-Pipeline
+
+
+#       listing images using the ecs-cli.       
+      - ecs-cli images --region $aws_default_region
+
+#      - echo Building the DJANGO AND MYSQL DOCKER IMAGES !!!!
+ #     - docker-compose build
+ #     - docker image ls
+#      - docker tag alpineimage:latest $aws_account_id.dkr.ecr.$aws_default_region.amazonaws.com/phishtray_mysql:$DATETIME   
+#      - docker image ls
+#      - docker push $aws_account_id.dkr.ecr.$aws_default_region.amazonaws.com/phishtray_mysql:$DATETIME
+      - echo  *******************************************************************************************************
+         
+  post_build:
+    commands:
