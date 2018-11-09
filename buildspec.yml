@@ -37,7 +37,7 @@ phases:
       - aws ecr describe-repositories
       - echo Logging.. in to Amazon ECR ....
       - eval $(aws ecr get-login --region $aws_default_region --no-include-email)
-      - ecs-cli compose --verbose --project-name new-codebuild --task-role-arn arn:aws:iam::$aws_account_id:role/service-role/codebuild-new-codebuild-service-role --region $aws_default_region --cluster-config Dev-Phishtray-Pipeline --ecs-profile Dev-Phishtray-Pipeline --cluster Dev-Phishtray-Pipeline
+      - ecs-cli compose --project-name new-codebuild --task-role-arn arn:aws:iam::$aws_account_id:role/service-role/codebuild-new-codebuild-service-role --region $aws_default_region --cluster-config Dev-Phishtray-Pipeline --ecs-profile Dev-Phishtray-Pipeline --cluster Dev-Phishtray-Pipeline
 
 
 #       listing images using the ecs-cli.       
